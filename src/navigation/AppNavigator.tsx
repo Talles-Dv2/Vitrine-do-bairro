@@ -2,11 +2,12 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useSafeAreaInsets } from 'react-native-safe-area-context'; // <--- NOVO IMPORT
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HomeScreen } from '../screens/HomeScreen';
 import { DetailsScreen } from '../screens/DetailsScreen';
 import { MapScreen } from '../screens/MapScreen';
 import { RegisterBusinessScreen } from '../screens/RegisterBusinessScreen';
+import { FavoritesScreen } from '../screens/FavoritesScreen'; // <--- 1. IMPORTAR A TELA AQUI
 import { colors } from '../theme/colors';
 
 const Tab = createBottomTabNavigator();
@@ -43,7 +44,7 @@ function HomeStack() {
 }
 
 export const AppNavigator: React.FC = () => {
-  const insets = useSafeAreaInsets(); // <--- CAPTURA A ÁREA SEGURA
+  const insets = useSafeAreaInsets(); 
 
   return (
     <NavigationContainer>
@@ -55,7 +56,7 @@ export const AppNavigator: React.FC = () => {
             backgroundColor: colors.white, 
             borderTopColor: colors.border, 
             paddingTop: 8, 
-            paddingBottom: insets.bottom, // <--- APLICA O ESPAÇAMENTO DINÂMICO
+            paddingBottom: insets.bottom, 
             minHeight: 60, 
             elevation: 10, 
             shadowColor: '#000', 
@@ -69,7 +70,8 @@ export const AppNavigator: React.FC = () => {
       >
         <Tab.Screen name="Início" component={HomeStack} options={{ tabBarLabel: 'Início' }} />
         <Tab.Screen name="Mapa" component={MapScreen} options={{ tabBarLabel: 'Mapa' }} />
-        <Tab.Screen name="Favoritos" component={MapScreen} options={{ tabBarLabel: 'Favoritos' }} />
+        {/* 2. ALTERAR O COMPONENT AQUI PARA FavoritesScreen */}
+        <Tab.Screen name="Favoritos" component={FavoritesScreen} options={{ tabBarLabel: 'Favoritos' }} />
         <Tab.Screen name="Perfil" component={MapScreen} options={{ tabBarLabel: 'Perfil' }} />
       </Tab.Navigator>
     </NavigationContainer>
