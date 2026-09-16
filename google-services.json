@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "896604210548",
+    "project_id": "vitrine-do-bairro-a29a8",
+    "storage_bucket": "vitrine-do-bairro-a29a8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:896604210548:android:4466721e73e63aa2d21821",
+        "android_client_info": {
+          "package_name": "com.vitrinedobairro.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhx6poS5Q0X2LuouDmIaZbWguMPyJI4sQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
