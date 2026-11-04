@@ -3,8 +3,8 @@
 Aplicativo de Lista de Compras Inteligente para o Desafio Prático Individual (AV2)
 
 ## Aluno
-- Nome: [Seu Nome Aqui]
-- RA: [Seu RA Aqui]
+- Nome: Talles ALvarenga Herrera
+- RA: 1710482421010
 
 ## Sobre o App
 Aplicativo mobile desenvolvido em React Native com Expo para gerenciar listas de compras de produtos em comércios locais do bairro.
@@ -58,7 +58,9 @@ src/
 - AsyncStorage
 
 ## Screenshots
-[Adicione screenshots do app funcionando aqui]
+![alt text](image-1.png)
+![alt text](image-2.png)
+
 
 ## Licença
 Projeto desenvolvido para fins acadêmicos - Disciplina Programação para Dispositivos Móveis

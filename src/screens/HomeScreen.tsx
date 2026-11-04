@@ -1,145 +1,78 @@
-import React, { useState, useEffect } from 'react';
-import { View, FlatList, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import React, { useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { Header } from '../components/Header';
-import { colors, spacing } from '../theme/colors';
-import { apiService } from '../services/api';
-import { Business } from '../types';
+import { useProducts } from '../hooks/useProducts';
 
-interface HomeScreenProps {
-  navigation: any;
-}
+export default function HomeScreen({ navigation }: any) {
+  const { products, totalPrice, reload } = useProducts();
 
-export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
-  const [businesses, setBusinesses] = useState<Business[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    loadBusinesses();
-  }, []);
-
-  const loadBusinesses = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await apiService.getBusinesses();
-      setBusinesses(data);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  useFocusEffect(
+    useCallback(() => {
+      void reload();
+    }, [reload])
+  );
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <Header title="Minha Lista de Compras" />
+    <SafeAreaView style={styles.container}>
+      <Header title="Vitrine do Bairro" />
       
       <View style={styles.content}>
-        {loading ? (
-          <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
-        ) : error ? (
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>⚠️ {error}</Text>
-            <TouchableOpacity style={styles.retryButton} onPress={loadBusinesses}>
-              <Text style={styles.retryText}>Tentar novamente</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <FlatList
-            data={businesses}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.businessCard}
-                onPress={() => navigation.navigate('ProductList', { businessId: item.id })}
-              >
-                <Text style={styles.businessName}>{item.name}</Text>
-                <Text style={styles.businessCategory}>{item.category}</Text>
-              </TouchableOpacity>
-            )}
-            ListEmptyComponent={
-              <Text style={styles.emptyText}>Nenhum comerciante encontrado</Text>
-            }
-          />
-        )}
-      </View>
+        <View style={styles.cardInfo}>
+          <Text style={styles.cardTitle}>Resumo das Compras</Text>
+          <Text style={styles.cardText}>Itens cadastrados: {products.length}</Text>
+          <Text style={styles.cardTotal}>Total estimado: R$ {totalPrice.toFixed(2)}</Text>
+        </View>
 
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => navigation.navigate('ProductForm', {})}
-      >
-        <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.primaryButton}
+          onPress={() => navigation.navigate('ProductList')}
+        >
+          <Text style={styles.buttonText}>Ver Minha Lista de Compras</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.secondaryButton}
+          onPress={() => navigation.navigate('ProductForm')}
+        >
+          <Text style={styles.secondaryButtonText}>+ Cadastrar Novo Produto</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { flex: 1, padding: spacing.md },
-  loader: { marginTop: 50 },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.xl,
-  },
-  errorText: {
-    fontSize: 16,
-    color: colors.error,
-    textAlign: 'center',
-    marginBottom: spacing.md,
-  },
-  retryButton: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: 8,
-  },
-  retryText: {
-    color: colors.white,
-    fontWeight: '600',
-  },
-  businessCard: {
-    backgroundColor: colors.white,
-    padding: spacing.md,
+  container: { flex: 1, backgroundColor: '#FFF8E7' },
+  content: { padding: 20, flex: 1, justifyContent: 'center' },
+  cardInfo: {
+    backgroundColor: '#FFF',
+    padding: 20,
     borderRadius: 12,
-    marginBottom: spacing.md,
-    elevation: 2,
+    marginBottom: 24,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  businessName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-  },
-  businessCategory: {
-    fontSize: 13,
-    color: colors.textLight,
-    marginTop: 4,
-  },
-  emptyText: {
-    textAlign: 'center',
-    color: colors.textLight,
-    marginTop: 50,
-    fontSize: 16,
-  },
-  fab: {
-    position: 'absolute',
-    right: 20,
-    bottom: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
+  cardTitle: { fontSize: 18, fontWeight: 'bold', color: '#004E64', marginBottom: 8 },
+  cardText: { fontSize: 16, color: '#2D2D2D', marginBottom: 4 },
+  cardTotal: { fontSize: 18, fontWeight: 'bold', color: '#FF6B35', marginTop: 8 },
+  primaryButton: {
+    backgroundColor: '#FF6B35',
+    padding: 16,
+    borderRadius: 8,
     alignItems: 'center',
-    elevation: 4,
+    marginBottom: 12,
   },
-  fabText: {
-    fontSize: 32,
-    color: colors.white,
-    fontWeight: '300',
+  buttonText: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
+  secondaryButton: {
+    backgroundColor: '#004E64',
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
   },
+  secondaryButtonText: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
 });

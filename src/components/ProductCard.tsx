@@ -1,105 +1,48 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors, spacing, borderRadius } from '../theme/colors';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Product } from '../types';
 
 interface ProductCardProps {
   product: Product;
-  onPress: () => void;
-  onTogglePurchased?: () => void;
+  onToggle: () => void | Promise<void>;
+  onPress?: () => void;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({
-  product,
-  onPress,
-  onTogglePurchased,
-}) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product, onToggle, onPress }) => {
+  const isDone = product.isPurchased || product.purchased;
+
   return (
-    <TouchableOpacity
-      style={[styles.card, product.isPurchased && styles.cardPurchased]}
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <Text style={[styles.name, product.isPurchased && styles.textPurchased]}>
-            {product.name}
-          </Text>
-          {onTogglePurchased && (
-            <TouchableOpacity onPress={onTogglePurchased} style={styles.checkbox}>
-              <Text style={styles.checkboxIcon}>
-                {product.isPurchased ? '✅' : '⬜'}
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
-        <Text style={styles.category}>{product.category}</Text>
-        <Text style={styles.price}>
-          R$ {product.price.toFixed(2).replace('.', ',')}
+    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
+      <TouchableOpacity onPress={() => { void onToggle(); }} style={styles.checkbox}>
+        <Text style={styles.checkboxText}>{isDone ? '✓' : '○'}</Text>
+      </TouchableOpacity>
+      <View style={styles.info}>
+        <Text style={[styles.name, isDone && styles.lineThrough]}>
+          {product.name}
         </Text>
-        {product.description && (
-          <Text style={styles.description} numberOfLines={2}>
-            {product.description}
-          </Text>
-        )}
+        <Text style={styles.merchant}>{product.merchant}</Text>
       </View>
+      <Text style={styles.price}>R$ {(product.price || 0).toFixed(2)}</Text>
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.md,
-    marginBottom: spacing.md,
-    padding: spacing.md,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  cardPurchased: {
-    opacity: 0.6,
-    backgroundColor: '#E8F5E9',
-  },
-  content: { flex: 1 },
-  header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: spacing.xs,
+    alignItems: 'center',
+    padding: 12,
+    marginVertical: 6,
+    marginHorizontal: 16,
+    backgroundColor: '#FFF',
+    borderRadius: 8,
+    elevation: 2,
   },
-  name: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-    flex: 1,
-  },
-  textPurchased: {
-    textDecorationLine: 'line-through',
-    color: colors.textLight,
-  },
-  checkbox: {
-    padding: spacing.sm,
-  },
-  checkboxIcon: {
-    fontSize: 20,
-  },
-  category: {
-    fontSize: 12,
-    color: colors.primary,
-    fontWeight: '500',
-    marginBottom: spacing.xs,
-  },
-  price: {
-    fontSize: 14,
-    color: colors.secondary,
-    fontWeight: '700',
-  },
-  description: {
-    fontSize: 13,
-    color: colors.textLight,
-    marginTop: spacing.xs,
-  },
+  checkbox: { marginRight: 12 },
+  checkboxText: { fontSize: 20, color: '#FF6B35', fontWeight: 'bold' },
+  info: { flex: 1 },
+  name: { fontSize: 16, fontWeight: '600', color: '#2D2D2D' },
+  lineThrough: { textDecorationLine: 'line-through', color: '#888' },
+  merchant: { fontSize: 12, color: '#6B6B6B' },
+  price: { fontSize: 16, fontWeight: 'bold', color: '#004E64' },
 });

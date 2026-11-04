@@ -1,217 +1,123 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Alert,
-} from 'react-native';
+import React, { useState } from 'react';
+import { View, TextInput, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Header } from '../components/Header';
-import { colors, spacing, borderRadius } from '../theme/colors';
-import { storageService } from '../services/storage';
-import { Product } from '../types';
+import { useProducts } from '../hooks/useProducts';
 
-interface ProductFormScreenProps {
-  navigation: any;
-  route: any;
-}
-
-export const ProductFormScreen: React.FC<ProductFormScreenProps> = ({ navigation, route }) => {
-  const { productId } = route.params || {};
-  
+export default function ProductFormScreen({ navigation }: any) {
   const [name, setName] = useState('');
+  const [merchant, setMerchant] = useState('');
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (productId) {
-      loadProduct();
-    }
-  }, [productId]);
+  const { addProduct } = useProducts();
 
-  const loadProduct = async () => {
-    const products = await storageService.getProducts();
-    const product = products.find(p => p.id === productId);
-    if (product) {
-      setName(product.name);
-      setPrice(product.price.toString());
-      setCategory(product.category);
-      setDescription(product.description || '');
-    }
-  };
-
-  const validate = (): boolean => {
-    const newErrors: { [key: string]: string } = {};
-
-    if (!name.trim()) {
-      newErrors.name = 'Nome do produto é obrigatório';
-    }
-
-    if (!price.trim()) {
-      newErrors.price = 'Preço é obrigatório';
-    } else if (isNaN(parseFloat(price)) || parseFloat(price) < 0) {
-      newErrors.price = 'Preço inválido';
-    }
-
-    if (!category.trim()) {
-      newErrors.category = 'Categoria é obrigatória';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async () => {
-    if (!validate()) {
-      Alert.alert('Erro', 'Corrija os campos destacados');
+  const handleSave = async () => {
+    if (!name.trim() || !merchant.trim() || !price.trim()) {
+      setError('Preencha os campos obrigatórios (*)!');
       return;
     }
 
-    setLoading(true);
-
-    try {
-      const productData: Product = {
-        id: productId || Date.now().toString(),
-        name: name.trim(),
-        price: parseFloat(price),
-        category: category.trim(),
-        description: description.trim(),
-        quantity: 1,
-        isPurchased: false,
-      };
-
-      if (productId) {
-        await storageService.updateProduct(productId, productData);
-      } else {
-        await storageService.addProduct(productData);
-      }
-
-      Alert.alert(
-        'Sucesso',
-        `Produto ${productId ? 'atualizado' : 'cadastrado'} com sucesso!`,
-        [{ text: 'OK', onPress: () => navigation.goBack() }]
-      );
-    } catch (error) {
-      Alert.alert('Erro', 'Não foi possível salvar o produto');
-    } finally {
-      setLoading(false);
+    const numericPrice = parseFloat(price.replace(',', '.'));
+    if (isNaN(numericPrice) || numericPrice <= 0) {
+      setError('Insira um preço válido maior que zero.');
+      return;
     }
+
+    setError('');
+    await addProduct({
+      name: name.trim(),
+      merchant: merchant.trim(),
+      price: numericPrice,
+      category: category.trim() || 'Geral',
+      description: description.trim(),
+    });
+    navigation.goBack();
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <Header title={productId ? 'Editar Produto' : 'Novo Produto'} />
-      
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.form}>
-          <Text style={styles.label}>Nome do Produto *</Text>
-          <TextInput
-            style={[styles.input, errors.name ? styles.inputError : undefined]}
-            value={name}
-            onChangeText={setName}
-            placeholder="Ex: Pão Francês"
-          />
-          {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <Text style={styles.title}>Cadastrar Produto</Text>
 
-          <Text style={styles.label}>Preço (R$) *</Text>
-          <TextInput
-            style={[styles.input, errors.price ? styles.inputError : undefined]}
-            value={price}
-            onChangeText={setPrice}
-            placeholder="Ex: 0.75"
-            keyboardType="decimal-pad"
-          />
-          {errors.price && <Text style={styles.errorText}>{errors.price}</Text>}
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-          <Text style={styles.label}>Categoria *</Text>
-          <TextInput
-            style={[styles.input, errors.category ? styles.inputError : undefined]}
-            value={category}
-            onChangeText={setCategory}
-            placeholder="Ex: Padaria, Hortifruti, etc."
-          />
-          {errors.category && <Text style={styles.errorText}>{errors.category}</Text>}
+        <Text style={styles.label}>Nome do Produto *</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Ex: Pão Francês, Leite, Frutas"
+          value={name}
+          onChangeText={setName}
+        />
 
-          <Text style={styles.label}>Descrição</Text>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            value={description}
-            onChangeText={setDescription}
-            placeholder="Descrição opcional do produto"
-            multiline
-            numberOfLines={4}
-          />
+        <Text style={styles.label}>Comerciante do Bairro *</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Ex: Padaria Central, Mercado Silva"
+          value={merchant}
+          onChangeText={setMerchant}
+        />
 
-          <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
-            onPress={handleSubmit}
-            disabled={loading}
-          >
-            <Text style={styles.buttonText}>
-              {loading ? 'Salvando...' : productId ? 'Atualizar' : 'Cadastrar'}
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <Text style={styles.label}>Preço Estimado (R$) *</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Ex: 8.50"
+          keyboardType="numeric"
+          value={price}
+          onChangeText={setPrice}
+        />
+
+        <Text style={styles.label}>Categoria</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Ex: Padaria, Hortifruti, Mercearia"
+          value={category}
+          onChangeText={setCategory}
+        />
+
+        <Text style={styles.label}>Descrição</Text>
+        <TextInput
+          style={[styles.input, styles.textArea]}
+          placeholder="Ex: Marca preferida ou observações (opcional)"
+          value={description}
+          onChangeText={setDescription}
+          multiline
+          numberOfLines={3}
+        />
+
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <Text style={styles.saveButtonText}>Salvar Produto</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.md },
-  form: { paddingBottom: spacing.xl },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: spacing.xs,
-    marginTop: spacing.md,
-  },
+  container: { flex: 1, backgroundColor: '#FFF' },
+  scrollContent: { padding: 20 },
+  title: { fontSize: 22, fontWeight: 'bold', color: '#004E64', marginBottom: 20 },
+  label: { fontSize: 14, fontWeight: '600', color: '#2D2D2D', marginBottom: 6 },
   input: {
-    backgroundColor: colors.white,
     borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: borderRadius.sm,
-    padding: spacing.md,
+    borderColor: '#E5E5E5',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
     fontSize: 16,
-    color: colors.text,
-    minHeight: 48,
-  },
-  inputError: {
-    borderColor: colors.error,
-    borderWidth: 2,
   },
   textArea: {
-    height: 100,
+    height: 80,
     textAlignVertical: 'top',
   },
-  errorText: {
-    color: colors.error,
-    fontSize: 12,
-    marginTop: 4,
-  },
-  button: {
-    backgroundColor: colors.primary,
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
+  errorText: { color: '#E74C3C', marginBottom: 12, fontWeight: 'bold' },
+  saveButton: {
+    backgroundColor: '#FF6B35',
+    padding: 16,
+    borderRadius: 8,
     alignItems: 'center',
-    marginTop: spacing.lg,
-    minHeight: 48,
-    justifyContent: 'center',
+    marginTop: 10,
   },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: colors.white,
-    fontSize: 16,
-    fontWeight: '700',
-  },
+  saveButtonText: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
 });

@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Product } from '../types';
+import { Product } from '../types/product';
 
 const PRODUCTS_KEY = '@vitrine:products';
 const SHOPPING_LIST_KEY = '@vitrine:shopping_list';

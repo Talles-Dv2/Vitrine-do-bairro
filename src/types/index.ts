@@ -1,10 +1,12 @@
 export interface Product {
   id: string;
   name: string;
+  merchant: string;
   price: number;
-  description?: string;
   category: string;
+  description?: string;
   quantity: number;
+  purchased: boolean;
   isPurchased: boolean;
 }
 
@@ -21,3 +23,6 @@ export type RootStackParamList = {
   ProductList: { businessId?: string };
   ProductForm: { productId?: string; businessId?: string };
 };
+
+export * from './product';
+
