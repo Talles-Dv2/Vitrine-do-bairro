@@ -27,7 +27,7 @@ Aplicativo mobile desenvolvido em React Native com Expo para gerenciar listas de
 ### Instalação
 
 1. Clone o repositório:
-   git clone [URL_DO_REPOSITORIO]
+   git clone (https://github.com/Talles-Dv2/Vitrine-do-bairro.git)
    cd vitrine-do-bairro-av2
 
 2. Instale as dependências:
@@ -60,6 +60,7 @@ src/
 ## Screenshots
 ![alt text](image-1.png)
 ![alt text](image-2.png)
+![alt text](image-3.png)
 
 
 ## Licença
